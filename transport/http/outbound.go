@@ -364,6 +364,7 @@ func (o *Outbound) call(ctx context.Context, treq *transport.Request) (*transpor
 	}
 	ctx, hreq, span, err := o.withOpentracingSpan(ctx, hreq, treq, start)
 	if err != nil {
+		o.transport.logger.Error("error sending HTTP request", zap.Error(err), zap.String("debug.location", "after withOpenTracingSpan"))
 		return nil, err
 	}
 	defer span.Finish()
@@ -662,6 +663,7 @@ func (o *Outbound) roundTrip(hreq *http.Request, treq *transport.Request, start 
 
 	p, onFinish, err := o.getPeerForRequest(ctx, treq)
 	if err != nil {
+		o.transport.logger.Error("error sending HTTP request", zap.Error(err), zap.String("debug.location", "after getPeerForRequest"))
 		return nil, err
 	}
 
@@ -684,6 +686,7 @@ func (o *Outbound) doWithPeer(
 
 	response, err := sender.Do(hreq.WithContext(ctx))
 	if err != nil {
+		o.transport.logger.Error("error sending HTTP request", zap.Error(err), zap.String("debug.location", "after sender.Do"))
 		// Workaround borrowed from ctxhttp until
 		// https://github.com/golang/go/issues/17711 is resolved.
 		select {
