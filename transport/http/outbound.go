@@ -24,6 +24,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -372,6 +373,9 @@ func (o *Outbound) call(ctx context.Context, treq *transport.Request) (*transpor
 
 	response, err := o.roundTrip(hreq, treq, start, o.client)
 	if err != nil {
+		if ctx.Err() != nil {
+			o.transport.logger.Error("Context error", zap.Any("ctx.error", ctx.Err()))
+		}
 		span.SetTag("error", true)
 		span.LogFields(opentracinglog.String("event", err.Error()))
 		return nil, err
